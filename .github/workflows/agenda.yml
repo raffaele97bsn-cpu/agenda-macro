@@ -1,0 +1,25 @@
+name: agenda-macro
+on:
+  schedule:
+    - cron: "*/10 * * * 1-5"
+  workflow_dispatch:
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests
+      - uses: actions/cache@v4
+        with:
+          path: feed_cache.json
+          key: feed-${{ github.run_id }}
+          restore-keys: feed-
+      - name: Esegui
+        run: python agenda_bot.py ${{ github.event_name == 'workflow_dispatch' && '--test' || '--once' }}
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
