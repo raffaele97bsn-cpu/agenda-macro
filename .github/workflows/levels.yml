@@ -1,0 +1,24 @@
+name: livelli
+on:
+  schedule:
+    - cron: "*/10 * * * 1-5"
+  workflow_dispatch:
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests yfinance
+      - uses: actions/cache@v4
+        with:
+          path: levels_state.json
+          key: levels-${{ github.run_id }}
+          restore-keys: levels-
+      - name: Esegui
+        run: python levels_bot.py ${{ github.event_name == 'workflow_dispatch' && '--test' || '' }}
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
